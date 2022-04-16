@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Box, Button } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 // import { Box } from '@mui/system';
 // import { Link } from 'react-router-dom';
 const HomePage = () => {
@@ -11,12 +11,18 @@ const HomePage = () => {
     e.preventDefault();
     const selected = e.target.files;
     setfile(selected[0]);
+    console.log(selected[0]);
   }
   function handleSubmit(){
     console.log('Handle submit called');
     const formData = new FormData();
     formData.append('file', file);
-  
+    if(file.size>=15728640)
+    {
+      console.log('size is more than allowed please try again.');
+      window.location.reload(true);
+      return;
+    }
     axios.post('/getPdf', formData, {
       headers: {
         'Content-Type' : 'multipart/form-data',
@@ -34,9 +40,11 @@ const HomePage = () => {
       });
   }
   return(<>
+    <Box m={4}></Box>
     <Button
       variant="contained"
       component="label"
+      sx={{ margin: '5%' }}
     >
       {/* Upload File */}
       <input
@@ -47,11 +55,33 @@ const HomePage = () => {
       />
       UPLOAD
     </Button>
-    <Button variant="contained" disabled={file==null} onClick={handleSubmit}>Submit</Button>
-    <br />
-    {
-      fileText!=null && highlight!=null && fileText.map((line, ind) => (<Box key={line} sx={{ backgroundColor:(highlight[ind]==1?'blue':null) }}>{ind}: {line}</Box>))
-    }
+    <Button variant="contained" disabled={file==null} onClick={handleSubmit} sx={{ margin: '5%' }}>Submit</Button>
+    <Typography>
+      {file!=null?file.name:null}
+    </Typography>
+    <Box m={4}></Box>
+    <Box sx={{ display: 'inline-block', flexDirection: 'column', alignItems: 'left', justifyContent:'left', textAlign:'left', backgroundColor:'white', borderRadius:'10px' }}>
+      {
+        fileText!=null && highlight!=null && fileText.map((line, ind) => 
+          <>
+            {
+              (line.split('\n').map((part, item) => (
+                <>
+                  {item!=0?<br />:null}
+                  <Typography key={ind*fileText.len+item} sx={{ display:'inline-block', justifyContent:'space-between', backgroundColor:(highlight[ind]==1?'yellow':null), margin:'-1', color:'black' }}>
+                    {part}
+                  </Typography>
+                </>
+              )))
+            }
+            {/* <p> */}
+            &nbsp;
+            {/* </p> */}
+          </>,
+        )
+      }
+    </Box>
+    <Box m={4}></Box>
   </>)  ;
 };
 
